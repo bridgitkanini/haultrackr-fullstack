@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "leaflet": "^1.9.4",
-    "lucide-react": "^0.525.0"
+    "lucide-react": "^0.525.0",
+    "react": "^19.0.0"
   }
 }
