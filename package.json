@@ -2,7 +2,15 @@
   "name": "@haultrackr-fullstack/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:frontend": "nx serve frontend",
+    "start:backend": "nx serve backend",
+    "start:all": "nx run-many --target=serve --projects=frontend,backend --parallel",
+    "build:frontend": "nx build frontend",
+    "test:frontend": "nx test frontend",
+    "migrate": "nx migrate backend",
+    "makemigrations": "nx makemigrations backend"
+  },
   "private": true,
   "dependencies": {
     "empty": "0.10.1",
