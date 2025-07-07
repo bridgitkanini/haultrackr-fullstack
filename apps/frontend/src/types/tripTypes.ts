@@ -11,9 +11,11 @@ export interface TripData {
   driverName?: string;
   driverId?: string;
   isCertified?: boolean;
+  route_data?: any;
+  stops?: any[];
 }
 export interface RoutePoint {
-  type: "pickup" | "dropoff" | "rest" | "fuel";
+  type: 'pickup' | 'dropoff' | 'rest' | 'fuel';
   location: string;
   coordinates: [number, number];
   time: Date;

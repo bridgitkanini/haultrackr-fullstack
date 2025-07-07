@@ -36,9 +36,7 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
       const tripRes = await createTrip(payload);
       const tripId = tripRes.data.id;
       // 2. Plan the trip (generate route, stops, etc.)
-      await planTrip(tripId);
-      // 3. Fetch the planned trip details
-      const plannedTripRes = await getTrip(tripId);
+      const plannedTripRes = await planTrip(tripId);
       setIsLoading(false);
       onSubmit(plannedTripRes.data); // Pass the planned trip data up
     } catch (err: any) {

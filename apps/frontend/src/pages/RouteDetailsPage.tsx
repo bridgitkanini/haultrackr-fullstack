@@ -1,18 +1,66 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { MapPin, Clock, Ruler, Truck, Calendar, Coffee } from "lucide-react";
-import { TripData, RouteData, RoutePoint } from "../types/tripTypes";
-import RouteMap from "../components/RouteMap";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { MapPin, Clock, Ruler, Truck, Calendar, Coffee } from 'lucide-react';
+import { TripData, RouteData, RoutePoint } from '../types/tripTypes';
+import RouteMap from '../components/RouteMap';
+
 interface RouteDetailsPageProps {
   tripData: TripData;
 }
+
+function mapBackendRouteData(
+  route_data: any,
+  tripData: any,
+  stops: any[]
+): RouteData {
+  // Build the points array: pickup, stops, dropoff
+  const points: RoutePoint[] = [];
+
+  // Pickup point
+  points.push({
+    type: 'pickup',
+    location: tripData.trip?.pickup_location || tripData.pickup_location,
+    coordinates: [0, 0], // You can improve this if you have coordinates
+    time: new Date(), // You can improve this if you have times
+  });
+
+  // Stops (rest/fuel)
+  for (const stop of stops) {
+    points.push({
+      type: stop.type.toLowerCase(), // "rest" or "fuel"
+      location: stop.location,
+      coordinates: [0, 0], // You can improve this if you have coordinates
+      time: new Date(stop.planned_arrival),
+      duration: stop.duration ? stop.duration * 60 : undefined, // hours to minutes
+    });
+  }
+
+  // Dropoff point
+  points.push({
+    type: 'dropoff',
+    location: tripData.trip?.dropoff_location || tripData.dropoff_location,
+    coordinates: [0, 0], // You can improve this if you have coordinates
+    time: new Date(), // You can improve this if you have times
+  });
+
+  return {
+    points,
+    totalDistance: route_data.distance,
+    totalDuration: Math.round(route_data.duration / 3600), // seconds to hours
+  };
+}
+
 const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    // Use the planned trip data directly
-    if (tripData && (tripData as any).route) {
-      setRouteData((tripData as any).route);
+    if (tripData && tripData.route_data) {
+      const mapped = mapBackendRouteData(
+        tripData.route_data,
+        tripData,
+        tripData.stops || []
+      );
+      setRouteData(mapped);
       setIsLoading(false);
     } else {
       setIsLoading(false);
@@ -49,20 +97,20 @@ const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
   }
   // Format the date
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
   // Count stops by type
   const restStops = routeData.points.filter(
-    (point) => point.type === "rest"
+    (point) => point.type === 'rest'
   ).length;
   const fuelStops = routeData.points.filter(
-    (point) => point.type === "fuel"
+    (point) => point.type === 'fuel'
   ).length;
   return (
     <div className="bg-slate-50 dark:bg-slate-900 min-h-screen">
@@ -123,11 +171,11 @@ const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
                     </p>
                     <div>
                       <p className="text-slate-900 dark:text-white">
-                        <span className="font-medium">Pickup:</span>{" "}
+                        <span className="font-medium">Pickup:</span>{' '}
                         {formatDate(routeData.points[0].time)}
                       </p>
                       <p className="text-slate-900 dark:text-white">
-                        <span className="font-medium">Drop-off:</span>{" "}
+                        <span className="font-medium">Drop-off:</span>{' '}
                         {formatDate(
                           routeData.points[routeData.points.length - 1].time
                         )}
@@ -170,16 +218,16 @@ const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
                   {routeData.points.map((point, index) => (
                     <div key={index} className="flex items-start">
                       <div className="flex-shrink-0 mt-1">
-                        {point.type === "pickup" && (
+                        {point.type === 'pickup' && (
                           <MapPin className="h-5 w-5 text-green-600" />
                         )}
-                        {point.type === "dropoff" && (
+                        {point.type === 'dropoff' && (
                           <MapPin className="h-5 w-5 text-red-600" />
                         )}
-                        {point.type === "rest" && (
+                        {point.type === 'rest' && (
                           <Coffee className="h-5 w-5 text-blue-600" />
                         )}
-                        {point.type === "fuel" && (
+                        {point.type === 'fuel' && (
                           <div className="h-5 w-5 text-yellow-600" />
                         )}
                       </div>
