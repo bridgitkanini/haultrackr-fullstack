@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "projectType": "application",
+  "sourceRoot": "apps/backend",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python manage.py runserver",
+        "cwd": "apps/backend"
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python manage.py migrate",
+        "cwd": "apps/backend"
+      }
+    },
+    "makemigrations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python manage.py makemigrations",
+        "cwd": "apps/backend"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python manage.py test",
+        "cwd": "apps/backend"
+      }
+    },
+    "collectstatic": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python manage.py collectstatic --noinput",
+        "cwd": "apps/backend"
+      }
+    }
+  }
+}
