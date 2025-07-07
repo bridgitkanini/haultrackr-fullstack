@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { MapPin, Navigation, Flag, Clock } from "lucide-react";
-import { TripData } from "../types/tripTypes";
-import { createTrip, planTrip, getTrip } from "../lib/api";
+import React, { useState } from 'react';
+import { MapPin, Navigation, Flag, Clock } from 'lucide-react';
+import { TripData } from '../types/tripTypes';
+import { createTrip, planTrip, getTrip } from '../lib/api';
 
 interface TripFormProps {
   onSubmit: (data: TripData) => void;
 }
 const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState<TripData>({
-    currentLocation: "",
-    pickupLocation: "",
-    dropoffLocation: "",
+    currentLocation: '',
+    pickupLocation: '',
+    dropoffLocation: '',
     currentCycleHours: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +18,7 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "currentCycleHours" ? parseFloat(value) || 0 : value,
+      [name]: name === 'currentCycleHours' ? parseFloat(value) || 0 : value,
     }));
   };
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,14 +36,21 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
       const tripRes = await createTrip(payload);
       const tripId = tripRes.data.id;
       // 2. Plan the trip (generate route, stops, etc.)
-      await planTrip(tripId, tripRes.data);
+      await planTrip(tripId);
       // 3. Fetch the planned trip details
       const plannedTripRes = await getTrip(tripId);
       setIsLoading(false);
       onSubmit(plannedTripRes.data); // Pass the planned trip data up
-    } catch (err) {
+    } catch (err: any) {
       setIsLoading(false);
-      alert("Failed to create and plan trip. Please try again.");
+      // Log the backend error for debugging
+      if (err.response && err.response.data && err.response.data.error) {
+        alert('Failed to create and plan trip: ' + err.response.data.error);
+        console.error('Backend error:', err.response.data.error);
+      } else {
+        alert('Failed to create and plan trip. Please try again.');
+        console.error(err);
+      }
     }
   };
   const detectCurrentLocation = () => {
@@ -61,13 +68,13 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
           setIsLoading(false);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error('Error getting location:', error);
           setIsLoading(false);
-          alert("Unable to detect location. Please enter manually.");
+          alert('Unable to detect location. Please enter manually.');
         }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
+      alert('Geolocation is not supported by your browser.');
     }
   };
   const isFormValid =
@@ -196,8 +203,8 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
           disabled={!isFormValid || isLoading}
           className={`w-full py-3 px-4 flex justify-center items-center rounded-md text-white font-medium ${
             isFormValid && !isLoading
-              ? "bg-teal-600 hover:bg-teal-700 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-              : "bg-slate-400 cursor-not-allowed"
+              ? 'bg-teal-600 hover:bg-teal-700 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500'
+              : 'bg-slate-400 cursor-not-allowed'
           }`}
         >
           {isLoading ? (
@@ -225,7 +232,7 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
               Processing...
             </span>
           ) : (
-            "Generate Route & Log"
+            'Generate Route & Log'
           )}
         </button>
       </div>

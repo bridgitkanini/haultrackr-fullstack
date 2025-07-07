@@ -3,7 +3,7 @@ Configuration file for API keys and settings
 """
 
 # OpenRouteService API Configuration
-OPENROUTE_API_KEY = 'your_api_key_here'  # Replace with actual API key
+OPENROUTE_API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImRhYTI5ZmU2MzZmMTQ2ZWE5YWZkZTA4YTExODY1MTVkIiwiaCI6Im11cm11cjY0In0='  # Replace with actual API key
 OPENROUTE_BASE_URL = 'https://api.openrouteservice.org'
 
 # Rest Stop API Configuration (for future use)
