@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MapPin, Clock, Ruler, Truck, Calendar, Coffee } from 'lucide-react';
 import { TripData, RouteData, RoutePoint } from '../types/tripTypes';
 import RouteMap from '../components/RouteMap';
 
 interface RouteDetailsPageProps {
-  tripData: TripData;
+  tripData: TripData & { id?: number };
 }
 
 function mapBackendRouteData(
@@ -50,22 +50,92 @@ function mapBackendRouteData(
   };
 }
 
-const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
+const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData: propTripData }) => {
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
+  const [tripData, setTripData] = useState<TripData & { id?: number } | null>(propTripData);
+  const navigate = useNavigate();
+
   useEffect(() => {
-    if (tripData && tripData.route_data) {
-      const mapped = mapBackendRouteData(
-        tripData.route_data,
-        tripData,
-        tripData.stops || []
-      );
-      setRouteData(mapped);
+    if (!tripData) {
+      console.warn('No tripData provided to RouteDetailsPage');
+      setError('No trip data available');
       setIsLoading(false);
+      return;
+    }
+
+    console.log('Trip Data in RouteDetailsPage:', tripData);
+    
+    if (tripData.route_data) {
+      console.log('Route data exists:', tripData.route_data);
+      try {
+        const mapped = mapBackendRouteData(
+          tripData.route_data,
+          tripData,
+          tripData.stops || []
+        );
+        console.log('Mapped route data:', mapped);
+        setRouteData(mapped);
+        setError(null);
+      } catch (error) {
+        console.error('Error mapping route data:', error);
+        setError('Failed to process route data');
+      }
+      setIsLoading(false);
+    } else if (retryCount < maxRetries) {
+      console.warn('No route_data in tripData, retrying...', { retryCount });
+      const timer = setTimeout(() => {
+        fetchTripData(tripData.id);
+        setRetryCount(prev => prev + 1);
+      }, 2000); // Wait 2 seconds before retrying
+      
+      return () => clearTimeout(timer);
     } else {
+      console.error('Max retries reached without getting route data');
+      setError('Failed to load route data after multiple attempts');
       setIsLoading(false);
     }
-  }, [tripData]);
+  }, [tripData, retryCount]);
+
+  const fetchTripData = async (tripId: number | undefined) => {
+    if (!tripId) {
+      console.error('No trip ID provided for fetching trip data');
+      setError('Invalid trip ID');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch(`http://localhost:8000/api/trips/${tripId}/`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setTripData(prev => ({
+        ...prev,
+        ...data,
+        id: data.id || tripId
+      }));
+      
+      if (!data.route_data) {
+        console.warn('No route_data in the fetched trip data');
+        // Don't set error here, let the effect handle retries
+      } else {
+        console.log('Successfully fetched route data');
+      }
+    } catch (error) {
+      console.error('Error fetching trip data:', error);
+      setError(`Failed to load trip data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      // Don't set loading to false here, let the effect handle it
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">
@@ -78,6 +148,36 @@ const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
       </div>
     );
   }
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+        <div className="text-center p-6 max-w-md mx-auto bg-white dark:bg-slate-800 rounded-lg shadow-md">
+          <div className="text-red-500 dark:text-red-400 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-2">Error Loading Route</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+            >
+              Try Again
+            </button>
+            <Link
+              to="/"
+              className="block w-full px-4 py-2 text-center text-teal-600 dark:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+            >
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!routeData) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">

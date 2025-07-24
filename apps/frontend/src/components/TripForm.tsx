@@ -24,33 +24,93 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
   };
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate successful trip creation
-    setTimeout(() => {
-      const mockTripData: TripData = {
-        ...formData,
-        startTime: new Date(),
-        distance: 150, // Mock distance in miles
-        driverName: 'Demo Driver',
-        driverId: 'demo-123',
-        isCertified: true,
-        route_data: {
-          points: [
-            { type: 'pickup', location: formData.pickupLocation, coordinates: [0, 0], time: new Date() },
-            { type: 'dropoff', location: formData.dropoffLocation, coordinates: [0, 0], time: new Date() }
-          ],
-          totalDistance: 150,
-          totalDuration: 2.5
-        }
-      };
+    try {
+      // 1. Create the trip
+      const tripRes = await fetch('http://localhost:8000/api/trips/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          current_location: formData.currentLocation,
+          pickup_location: formData.pickupLocation,
+          dropoff_location: formData.dropoffLocation,
+          current_cycle_hours: formData.currentCycleHours,
+        }),
+      });
+
+      if (!tripRes.ok) {
+        throw new Error(`HTTP error! status: ${tripRes.status}`);
+      }
+
+      const tripData = await tripRes.json();
+      const tripId = tripData.id;
       
+      // 2. Plan the trip (generate route, stops, etc.)
+      const planRes = await fetch(`http://localhost:8000/api/trips/${tripId}/plan/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!planRes.ok) {
+        let errorMessage = `HTTP error! status: ${planRes.status}`;
+        try {
+          const errorData = await planRes.json();
+          errorMessage = errorData.error || errorData.detail || JSON.stringify(errorData);
+        } catch (e) {
+          // If we can't parse the error as JSON, use the status text
+          errorMessage = planRes.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      // 3. Get the full trip data with all details
+      // 3. Get the full trip data with all details
+      // Wait a moment to ensure the backend has processed everything
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Retry a few times to get the updated trip with route data
+      let retries = 3;
+      let tripDetails = null;
+      
+      while (retries > 0) {
+        const tripDetailsRes = await fetch(`http://localhost:8000/api/trips/${tripId}/`);
+        
+        if (!tripDetailsRes.ok) {
+          throw new Error(`HTTP error! status: ${tripDetailsRes.status}`);
+        }
+        
+        tripDetails = await tripDetailsRes.json();
+        
+        // If we have route_data or we've run out of retries, break the loop
+        if (tripDetails.route_data || retries === 1) {
+          break;
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        retries--;
+      }
+      
+      if (!tripDetails) {
+        throw new Error('Failed to retrieve trip details');
+      }
+      
+      console.log('Trip details with route data:', tripDetails);
       setIsLoading(false);
-      onSubmit(mockTripData);
-      navigate('/route-details');
-    }, 1000);
+      onSubmit(tripDetails);
+      navigate('/route-details', { state: { tripData: tripDetails } });
+    } catch (error) {
+      console.error('Error creating/planning trip:', error);
+      setIsLoading(false);
+      alert('Failed to create and plan trip. Please try again.');
+    }
   };
   const detectCurrentLocation = () => {
     if (navigator.geolocation) {

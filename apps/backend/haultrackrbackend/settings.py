@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-a1rbz5rrp5sha+j#36w4u6&uy@k5(%43v&ltpw4v)tco+z%fyj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["haultrackr-fullstack.onrender.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["haultrackr-fullstack.onrender.com", "127.0.0.1", "localhost"]
 
 
 # Application definition
