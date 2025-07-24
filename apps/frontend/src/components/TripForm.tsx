@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Navigation, Flag, Clock } from 'lucide-react';
 import { TripData } from '../types/tripTypes';
-import { createTrip, planTrip, getTrip } from '../lib/api';
 
 interface TripFormProps {
   onSubmit: (data: TripData) => void;
 }
 const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
-  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<TripData>({
     currentLocation: '',
     pickupLocation: '',
@@ -23,49 +22,35 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
       [name]: name === 'currentCycleHours' ? parseFloat(value) || 0 : value,
     }));
   };
-  const isAuthenticated = () => {
-    return !!localStorage.getItem('access_token');
-  };
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Check if user is authenticated
-    if (!isAuthenticated()) {
-      // Store form data in session storage to repopulate after login
-      sessionStorage.setItem('tripFormData', JSON.stringify(formData));
-      // Redirect to login with a return URL
-      navigate('/login?returnTo=/');
-      return;
-    }
-
     setIsLoading(true);
-    try {
-      // Map formData to backend snake_case keys
-      const payload = {
-        current_location: formData.currentLocation,
-        pickup_location: formData.pickupLocation,
-        dropoff_location: formData.dropoffLocation,
-        current_cycle_hours: formData.currentCycleHours,
+    
+    // Simulate successful trip creation
+    setTimeout(() => {
+      const mockTripData: TripData = {
+        ...formData,
+        startTime: new Date(),
+        distance: 150, // Mock distance in miles
+        driverName: 'Demo Driver',
+        driverId: 'demo-123',
+        isCertified: true,
+        route_data: {
+          points: [
+            { type: 'pickup', location: formData.pickupLocation, coordinates: [0, 0], time: new Date() },
+            { type: 'dropoff', location: formData.dropoffLocation, coordinates: [0, 0], time: new Date() }
+          ],
+          totalDistance: 150,
+          totalDuration: 2.5
+        }
       };
-      // 1. Create the trip
-      const tripRes = await createTrip(payload);
-      const tripId = tripRes.data.id;
-      // 2. Plan the trip (generate route, stops, etc.)
-      const plannedTripRes = await planTrip(tripId);
+      
       setIsLoading(false);
-      onSubmit(plannedTripRes.data); // Pass the planned trip data up
-    } catch (err: any) {
-      setIsLoading(false);
-      // Log the backend error for debugging
-      if (err.response && err.response.data && err.response.data.error) {
-        alert('Failed to create and plan trip: ' + err.response.data.error);
-        console.error('Backend error:', err.response.data.error);
-      } else {
-        alert('Failed to create and plan trip. Please try again.');
-        console.error(err);
-      }
-    }
+      onSubmit(mockTripData);
+      navigate('/route-details');
+    }, 1000);
   };
   const detectCurrentLocation = () => {
     if (navigator.geolocation) {
