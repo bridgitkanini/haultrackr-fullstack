@@ -30,8 +30,8 @@
 1. **Clone the repository:**
 
    ```bash
-   git clone <repo-url>
-   cd haultrackr-fullstack/apps/backend
+   git clone https://github.com/bridgitkanini/haultrackr-fullstack.git
+   cd apps/backend
    ```
 
 2. **Create and activate a virtual environment:**
@@ -67,22 +67,21 @@
    ```
 
 7. **Access the API and documentation:**
-   - API root: [http://localhost:8000/api/](http://localhost:8000/api/)
-   - Swagger: [http://localhost:8000/swagger/](http://localhost:8000/swagger/)
-   - ReDoc: [http://localhost:8000/redoc/](http://localhost:8000/redoc/)
+   - API root: [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
+   - Swagger: [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/)
+   - ReDoc: [http://127.0.0.1:8000/redoc/](http://127.0.0.1:8000/redoc/)
 
 ### Frontend
 
 1. **Install dependencies:**
 
    ```bash
-   cd ../../frontend
-   npm install
+   npm install 
    ```
 
 2. **Run the development server:**
    ```bash
-   npm run dev
+   npx nx serve frontend
    ```
    The frontend will be available at [http://localhost:4200](http://localhost:4200).
 

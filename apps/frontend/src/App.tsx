@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-} from "react-router-dom";
-import Header from "./components/Header";
-import HomePage from "./pages/HomePage";
-import RouteDetailsPage from "./pages/RouteDetailsPage";
-import EldLogsPage from "./pages/EldLogsPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import { TripData } from "./types/tripTypes";
-import { getTrips } from "./lib/api";
+} from 'react-router-dom';
+import Header from './components/Header';
+import HomePage from './pages/HomePage';
+import RouteDetailsPage from './pages/RouteDetailsPage';
+import EldLogsPage from './pages/EldLogsPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import { TripData } from './types/tripTypes';
+import { getTrips } from './lib/api';
 
 export function App() {
   const [tripData, setTripData] = useState<TripData | null>(null);
@@ -43,7 +43,7 @@ export function App() {
   };
 
   function isAuthenticated() {
-    return !!localStorage.getItem("access_token");
+    return !!localStorage.getItem('access_token');
   }
 
   return (
@@ -57,11 +57,7 @@ export function App() {
             <Route
               path="/"
               element={
-                isAuthenticated() ? (
-                  <HomePage onTripSubmit={handleTripSubmit} />
-                ) : (
-                  <Navigate to="/login" />
-                )
+                <HomePage onTripSubmit={handleTripSubmit} />
               }
             />
             <Route

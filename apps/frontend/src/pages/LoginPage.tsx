@@ -1,34 +1,56 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../lib/api";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { login } from '../lib/api';
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') || '/';
 
   useEffect(() => {
-    // If already authenticated, redirect to home
-    if (localStorage.getItem("access_token")) {
-      navigate("/");
+    // If already authenticated, redirect to the return URL or home
+    if (localStorage.getItem('access_token')) {
+      navigate(returnTo);
     }
-  }, [navigate]);
+  }, [navigate, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
     try {
       const res = await login({ username, password });
-      localStorage.setItem("access_token", res.data.access);
-      localStorage.setItem("refresh_token", res.data.refresh);
+      localStorage.setItem('access_token', res.data.access);
+      localStorage.setItem('refresh_token', res.data.refresh);
       setLoading(false);
-      navigate("/");
+      
+      // After successful login, restore any saved form data if it exists
+      const savedFormData = sessionStorage.getItem('tripFormData');
+      if (savedFormData) {
+        sessionStorage.removeItem('tripFormData');
+        // If we were in the middle of a form submission, submit it now
+        try {
+          const formData = JSON.parse(savedFormData);
+          // This will trigger the form submission flow again, now that we're authenticated
+          setTimeout(() => {
+            const form = document.querySelector('form');
+            if (form) {
+              form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+          }, 100);
+        } catch (e) {
+          console.error('Error parsing saved form data:', e);
+        }
+      }
+      
+      navigate(returnTo);
     } catch (err: any) {
       setLoading(false);
-      setError("Invalid username or password");
+      setError('Invalid username or password');
     }
   };
 
@@ -71,10 +93,10 @@ const LoginPage: React.FC = () => {
           disabled={loading}
           className="w-full py-3 px-4 rounded-md text-white font-medium bg-teal-600 hover:bg-teal-700 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? 'Logging in...' : 'Login'}
         </button>
         <div className="mt-4 text-center text-slate-600 dark:text-slate-400">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <a href="/register" className="text-teal-600 hover:underline">
             Register
           </a>

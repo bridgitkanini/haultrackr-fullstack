@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapPin, Navigation, Flag, Clock } from 'lucide-react';
 import { TripData } from '../types/tripTypes';
 import { createTrip, planTrip, getTrip } from '../lib/api';
@@ -7,6 +8,7 @@ interface TripFormProps {
   onSubmit: (data: TripData) => void;
 }
 const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<TripData>({
     currentLocation: '',
     pickupLocation: '',
@@ -21,8 +23,22 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
       [name]: name === 'currentCycleHours' ? parseFloat(value) || 0 : value,
     }));
   };
+  const isAuthenticated = () => {
+    return !!localStorage.getItem('access_token');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      // Store form data in session storage to repopulate after login
+      sessionStorage.setItem('tripFormData', JSON.stringify(formData));
+      // Redirect to login with a return URL
+      navigate('/login?returnTo=/');
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Map formData to backend snake_case keys
