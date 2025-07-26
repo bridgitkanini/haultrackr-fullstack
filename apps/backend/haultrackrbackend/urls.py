@@ -4,6 +4,9 @@ haultrackrbackend URL Configuration
 
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -44,4 +47,13 @@ urlpatterns = [
         name="schema-swagger-ui",
     ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    
+    # Authentication URLs for browsable API
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='rest_framework/login.html'), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
+
+# Serve static and media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
