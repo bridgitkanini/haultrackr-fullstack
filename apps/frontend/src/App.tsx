@@ -5,14 +5,14 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import Header from './components/Header';
-import HomePage from './pages/HomePage';
-import RouteDetailsPage from './pages/RouteDetailsPage';
-import EldLogsPage from './pages/EldLogsPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import { TripData } from './types/tripTypes';
-import { getTrips } from './lib/api';
+import Header from '@/components/Header';
+import HomePage from '@/pages/HomePage';
+import RouteDetailsPage from '@/pages/RouteDetailsPage';
+import EldLogsPage from '@/pages/EldLogsPage';
+import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import { TripData } from '@/types/tripTypes';
+import { getTrips } from '@/lib/api';
 
 export function App() {
   const [tripData, setTripData] = useState<TripData | null>(null);

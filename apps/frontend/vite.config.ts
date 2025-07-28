@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import path from 'path';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -10,16 +11,33 @@ export default defineConfig(() => ({
   server: {
     port: 4200,
     host: 'localhost',
+    strictPort: true,
+    open: true,
   },
   preview: {
     port: 4200,
     host: 'localhost',
+    strictPort: true,
   },
-  plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ nxViteTsPaths() ],
-  // },
+  plugins: [
+    react({
+      jsxImportSource: '@emotion/react',
+      babel: {
+        plugins: ['@emotion/babel-plugin'],
+      },
+    }), 
+    nxViteTsPaths(), 
+    nxCopyAssetsPlugin(['*.md'])
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@pages': path.resolve(__dirname, 'src/pages'),
+      '@lib': path.resolve(__dirname, 'src/lib'),
+      '@types': path.resolve(__dirname, 'src/types'),
+    },
+  },
   build: {
     outDir: '../../dist/apps/frontend',
     emptyOutDir: true,

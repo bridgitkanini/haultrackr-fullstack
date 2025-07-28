@@ -9,9 +9,9 @@ import {
   Truck,
   Info,
 } from "lucide-react";
-import { TripData } from "../types/tripTypes";
-import { getLogs, generateLogs, getLog, getLogGrid } from "../lib/api";
-import api from "../lib/api";
+import { TripData } from "@/types/tripTypes";
+import { getLogs, generateLogs, getLog, getLogGrid } from "@/lib/api";
+import api from "@/lib/api";
 
 interface EldLogsPageProps {
   tripData: TripData;
