@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Navigation, Flag, Clock } from 'lucide-react';
 import { TripData } from '../types/tripTypes';
+import { createTrip, planTrip, getTrip } from '../lib/api';
 
 interface TripFormProps {
   onSubmit: (data: TripData) => void;
 }
 const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<TripData>({
     currentLocation: '',
     pickupLocation: '',
@@ -22,94 +23,48 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
       [name]: name === 'currentCycleHours' ? parseFloat(value) || 0 : value,
     }));
   };
-  const navigate = useNavigate();
+  const isAuthenticated = () => {
+    return !!localStorage.getItem('access_token');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      // Store form data in session storage to repopulate after login
+      sessionStorage.setItem('tripFormData', JSON.stringify(formData));
+      // Redirect to login with a return URL
+      navigate('/login?returnTo=/');
+      return;
+    }
+
+    setIsLoading(true);
     try {
+      // Map formData to backend snake_case keys
+      const payload = {
+        current_location: formData.currentLocation,
+        pickup_location: formData.pickupLocation,
+        dropoff_location: formData.dropoffLocation,
+        current_cycle_hours: formData.currentCycleHours,
+      };
       // 1. Create the trip
-      const tripRes = await fetch('http://localhost:8000/api/trips/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          current_location: formData.currentLocation,
-          pickup_location: formData.pickupLocation,
-          dropoff_location: formData.dropoffLocation,
-          current_cycle_hours: formData.currentCycleHours,
-        }),
-      });
-
-      if (!tripRes.ok) {
-        throw new Error(`HTTP error! status: ${tripRes.status}`);
-      }
-
-      const tripData = await tripRes.json();
-      const tripId = tripData.id;
-      
+      const tripRes = await createTrip(payload);
+      const tripId = tripRes.data.id;
       // 2. Plan the trip (generate route, stops, etc.)
-      const planRes = await fetch(`http://localhost:8000/api/trips/${tripId}/plan/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!planRes.ok) {
-        let errorMessage = `HTTP error! status: ${planRes.status}`;
-        try {
-          const errorData = await planRes.json();
-          errorMessage = errorData.error || errorData.detail || JSON.stringify(errorData);
-        } catch (e) {
-          // If we can't parse the error as JSON, use the status text
-          errorMessage = planRes.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-      
-      // 3. Get the full trip data with all details
-      // 3. Get the full trip data with all details
-      // Wait a moment to ensure the backend has processed everything
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Retry a few times to get the updated trip with route data
-      let retries = 3;
-      let tripDetails = null;
-      
-      while (retries > 0) {
-        const tripDetailsRes = await fetch(`http://localhost:8000/api/trips/${tripId}/`);
-        
-        if (!tripDetailsRes.ok) {
-          throw new Error(`HTTP error! status: ${tripDetailsRes.status}`);
-        }
-        
-        tripDetails = await tripDetailsRes.json();
-        
-        // If we have route_data or we've run out of retries, break the loop
-        if (tripDetails.route_data || retries === 1) {
-          break;
-        }
-        
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        retries--;
-      }
-      
-      if (!tripDetails) {
-        throw new Error('Failed to retrieve trip details');
-      }
-      
-      console.log('Trip details with route data:', tripDetails);
+      const plannedTripRes = await planTrip(tripId);
       setIsLoading(false);
-      onSubmit(tripDetails);
-      navigate('/route-details', { state: { tripData: tripDetails } });
-    } catch (error) {
-      console.error('Error creating/planning trip:', error);
+      onSubmit(plannedTripRes.data); // Pass the planned trip data up
+    } catch (err: any) {
       setIsLoading(false);
-      alert('Failed to create and plan trip. Please try again.');
+      // Log the backend error for debugging
+      if (err.response && err.response.data && err.response.data.error) {
+        alert('Failed to create and plan trip: ' + err.response.data.error);
+        console.error('Backend error:', err.response.data.error);
+      } else {
+        alert('Failed to create and plan trip. Please try again.');
+        console.error(err);
+      }
     }
   };
   const detectCurrentLocation = () => {

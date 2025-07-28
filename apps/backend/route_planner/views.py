@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 import requests
 import json
 import math
@@ -23,20 +24,21 @@ from eld_logs.services.log_generator import LogGenerator, LogGenerationError
 
 class TripViewSet(viewsets.ModelViewSet):
     serializer_class = TripSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access
-    queryset = Trip.objects.all()
+    permission_classes = [IsAuthenticated]
+    queryset = Trip.objects.all()  # Add this line
 
     def get_queryset(self):
         """
-        Return all trips since we're allowing unauthenticated access.
+        This view should return a list of all the trips
+        for the currently authenticated user.
         """
-        return Trip.objects.all()
+        return Trip.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         """
-        Save the trip without assigning a user.
+        Assign the current user to the trip.
         """
-        serializer.save()
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=["post"], url_path="plan")
     def plan_route(self, request, pk=None):
@@ -49,10 +51,6 @@ class TripViewSet(viewsets.ModelViewSet):
             # 1. Calculate the route using the routing service
             routing_service = RoutingService()
             route_data = routing_service.calculate_route(trip)
-            
-            # Save route data to the trip
-            trip.route_data = route_data
-            trip.save(update_fields=['route_data'])
 
             # 2. Plan the stops using the stop planner service
             stop_planner = StopPlanner(trip, route_data)
@@ -63,7 +61,7 @@ class TripViewSet(viewsets.ModelViewSet):
             log_generator = LogGenerator(trip)
             logs = log_generator.generate_logs()
 
-            # 4. Return the response
+            # 4. Return the response directly without using the serializer for input validation
             plan_data = {
                 "trip": TripSerializer(trip).data,
                 "route_data": route_data,

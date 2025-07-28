@@ -1,58 +1,102 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import RouteDetailsPage from './pages/RouteDetailsPage';
 import EldLogsPage from './pages/EldLogsPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import { TripData } from './types/tripTypes';
+import { getTrips } from './lib/api';
 
 export function App() {
   const [tripData, setTripData] = useState<TripData | null>(null);
+  const [loadingTrip, setLoadingTrip] = useState(false);
+
+  // Fallback: fetch latest trip if tripData is missing and user is authenticated
+  useEffect(() => {
+    async function fetchLatestTrip() {
+      if (!tripData && isAuthenticated()) {
+        setLoadingTrip(true);
+        try {
+          const res = await getTrips();
+          if (res.data && res.data.length > 0) {
+            setTripData(res.data[res.data.length - 1]); // Use the latest trip
+          }
+        } catch {
+          /* ignore error */
+        }
+        setLoadingTrip(false);
+      }
+    }
+    fetchLatestTrip();
+    // eslint-disable-next-line
+  }, []);
 
   const handleTripSubmit = (data: TripData) => {
     setTripData(data);
   };
 
-  // Authentication is not required for any routes
-  // This function is kept for compatibility but always returns true
+  function isAuthenticated() {
+    return !!localStorage.getItem('access_token');
+  }
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+      <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50">
         <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+        <main className="flex-1">
           <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route
               path="/"
               element={
-                !tripData ? (
-                  <HomePage onTripSubmit={handleTripSubmit} />
-                ) : (
-                  <RouteDetailsPage tripData={tripData} />
-                )
+                <HomePage onTripSubmit={handleTripSubmit} />
               }
             />
             <Route
               path="/route-details"
               element={
-                tripData ? (
-                  <RouteDetailsPage tripData={tripData} />
+                isAuthenticated() ? (
+                  tripData ? (
+                    <RouteDetailsPage tripData={tripData} />
+                  ) : loadingTrip ? (
+                    <div className="flex justify-center items-center h-64 text-lg">
+                      Loading trip data...
+                    </div>
+                  ) : (
+                    <div className="flex justify-center items-center h-64 text-lg text-red-600">
+                      No trip data found.
+                    </div>
+                  )
                 ) : (
-                  <div className="flex justify-center items-center h-64 text-lg text-red-600">
-                    No trip data found. Please create a trip first.
-                  </div>
+                  <Navigate to="/login" />
                 )
               }
             />
             <Route
               path="/eld-logs"
               element={
-                tripData ? (
-                  <EldLogsPage tripData={tripData} />
+                isAuthenticated() ? (
+                  tripData ? (
+                    <EldLogsPage tripData={tripData} />
+                  ) : loadingTrip ? (
+                    <div className="flex justify-center items-center h-64 text-lg">
+                      Loading trip data...
+                    </div>
+                  ) : (
+                    <div className="flex justify-center items-center h-64 text-lg text-red-600">
+                      No trip data found.
+                    </div>
+                  )
                 ) : (
-                  <div className="flex justify-center items-center h-64 text-lg text-red-600">
-                    No trip data found. Please create a trip first.
-                  </div>
+                  <Navigate to="/login" />
                 )
               }
             />
