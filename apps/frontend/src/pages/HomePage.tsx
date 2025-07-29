@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import TripForm from "../components/TripForm";
 import { TripData } from "../types/tripTypes";
-import { Truck, BarChart } from "lucide-react";
+import { Truck, BarChart, MapPin } from "lucide-react";
 interface HomePageProps {
   onTripSubmit: (data: TripData) => void;
 }
@@ -56,7 +56,7 @@ const HomePage: React.FC<HomePageProps> = ({ onTripSubmit }) => {
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md text-center">
               <div className="inline-flex items-center justify-center p-3 bg-teal-100 dark:bg-teal-900 rounded-full mb-4">
-                <div className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                <MapPin className="h-6 w-6 text-teal-600 dark:text-teal-400" />
               </div>
               <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">
                 Route Planning

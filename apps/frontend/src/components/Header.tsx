@@ -51,7 +51,7 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2">
             <Truck className="h-6 w-6" />
-            <span className="text-xl font-bold">TruckRoute Pro</span>
+            <span className="text-xl font-bold">HaulTrackr</span>
           </Link>
           <div className="hidden md:flex flex-1 justify-center items-center">
             <nav className="flex items-center space-x-8">
