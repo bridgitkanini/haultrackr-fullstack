@@ -1,15 +1,19 @@
 {
   "version": 2,
-  "buildCommand": "cd apps/frontend && pnpm install && pnpm build",
-  "outputDirectory": "apps/frontend/dist",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": "vite",
-  "regions": ["iad1"],
   "builds": [
-    { "src": "apps/frontend/vite.config.ts", "use": "@vercel/static-build" }
+    {
+      "src": "apps/frontend/vercel-build.js",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
   ],
   "routes": [
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
-  ]
+  ],
+  "env": {
+    "NODE_VERSION": "20"
+  }
 }
