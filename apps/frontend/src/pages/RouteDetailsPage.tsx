@@ -119,8 +119,8 @@ const RouteDetailsPage: React.FC<RouteDetailsPageProps> = ({ tripData }) => {
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
             Route Details
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            From {tripData.pickupLocation} to {tripData.dropoffLocation}
+          <p className="text-slate-700 dark:text-slate-400">
+            From {routeData.points[0].location} to {routeData.points[routeData.points.length - 1].location}
           </p>
         </div>
         <div className="grid lg:grid-cols-3 gap-8">
