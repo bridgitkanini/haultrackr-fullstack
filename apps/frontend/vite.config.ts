@@ -20,6 +20,7 @@ const plugins: Plugin[] = [
 
 const config: UserConfig = {
   root: __dirname,
+  base: '/', // Set base path for production
   define: {
     'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'https://haultrackr-fullstack.onrender.com/api')
   },
@@ -50,7 +51,7 @@ const config: UserConfig = {
     },
   },
   build: {
-    outDir: '../../dist/apps/frontend',
+    outDir: '../../dist/frontend',
     emptyOutDir: true,
     reportCompressedSize: true,
     commonjsOptions: {
@@ -58,10 +59,10 @@ const config: UserConfig = {
     },
     rollupOptions: {
       output: {
-        dir: '../../dist/apps/frontend',
         manualChunks: {
-          'lucide-react': ['lucide-react']
-        }
+          react: ['react', 'react-dom', 'react-router-dom'],
+          vendor: ['axios', 'leaflet', 'lucide-react'],
+        },
       },
       external: []
     },
