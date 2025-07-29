@@ -21,9 +21,13 @@ const plugins: Plugin[] = [
 const config: UserConfig = {
   root: __dirname,
   define: {
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL)
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'https://haultrackr-fullstack.onrender.com/api')
   },
   cacheDir: '../../node_modules/.vite/apps/frontend',
+  optimizeDeps: {
+    include: ['lucide-react'],
+    force: true
+  },
   server: {
     port: 4200,
     host: 'localhost',
@@ -52,11 +56,14 @@ const config: UserConfig = {
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    // Ensure the output directory structure is created correctly
     rollupOptions: {
       output: {
-        dir: '../../dist/apps/frontend'
-      }
+        dir: '../../dist/apps/frontend',
+        manualChunks: {
+          'lucide-react': ['lucide-react']
+        }
+      },
+      external: []
     },
   },
 };
