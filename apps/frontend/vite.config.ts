@@ -20,6 +20,9 @@ const plugins: Plugin[] = [
 
 const config: UserConfig = {
   root: __dirname,
+  define: {
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL)
+  },
   cacheDir: '../../node_modules/.vite/apps/frontend',
   server: {
     port: 4200,
