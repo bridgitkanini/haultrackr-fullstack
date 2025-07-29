@@ -5,12 +5,13 @@
       "src": "apps/frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist/apps/frontend"
       }
     }
   ],
   "routes": [
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
-  ]
+  ],
+  "buildCommand": "cd apps/frontend && pnpm install --no-frozen-lockfile && pnpm run build"
 }
