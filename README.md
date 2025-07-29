@@ -9,6 +9,36 @@
 Deployed Frontend: https://haultrackr.onrender.com 
 Deployed Backend: https://haultrackr-fullstack.onrender.com/api
 
+## Project Structure
+
+```
+haultrackr-fullstack/
+├── apps/
+│   ├── backend/             # Django backend application
+│   │   ├── api/             # API endpoints and views
+│   │   ├── core/            # Core application logic
+│   │   └── manage.py        # Django management script
+│   │
+│   ├── frontend/            # React frontend application
+│   │   ├── src/             # Source code
+│   │   │   ├── components/  # Reusable UI components
+│   │   │   ├── pages/       # Page components
+│   │   │   └── App.tsx      # Main application component
+│   │   └── ...
+│   │
+│   └── frontend-e2e/        # End-to-end tests
+│
+├── .github/                 # GitHub configuration
+├── .vscode/                 # VS Code settings
+├── node_modules/            # Frontend dependencies
+├── venv/                    # Python virtual environment
+├── .gitignore               # Git ignore file
+├── package.json             # Frontend dependencies
+├── pnpm-lock.yaml           # Lock file for pnpm
+├── README.md                # This file
+└── tsconfig.base.json       # TypeScript configuration
+```
+
 ### Key Features
 
 - **Route Planning:** Calculates optimal truck routes using the OpenRouteService API, factoring in HOS rules, rest stops, and fuel stops.
