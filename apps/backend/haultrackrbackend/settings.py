@@ -70,7 +70,7 @@ REST_FRAMEWORK = {
 # Allow requests from your React app's domain
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # For local development
-    "https://haul-trackr.vercel.app",  # For production
+    "https://haultrackr.onrender.com",  # For production
 ]
 
 # For simplicity in development
