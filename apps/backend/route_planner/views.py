@@ -24,21 +24,46 @@ from eld_logs.services.log_generator import LogGenerator, LogGenerationError
 
 class TripViewSet(viewsets.ModelViewSet):
     serializer_class = TripSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = Trip.objects.all()  # Add this line
+    permission_classes = []  # Remove authentication requirement
+    queryset = Trip.objects.all()
 
     def get_queryset(self):
         """
-        This view should return a list of all the trips
-        for the currently authenticated user.
+        Return all trips. In a production environment, you might want to add
+        additional filtering or security measures here.
         """
-        return Trip.objects.filter(user=self.request.user)
+        return Trip.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new trip with debug logging.
+        """
+        print("Create method called with data:", request.data)
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            print("Error in create method:", str(e))
+            import traceback
+            traceback.print_exc()
+            raise
 
     def perform_create(self, serializer):
         """
-        Assign the current user to the trip.
+        Save the trip. If user is authenticated, assign them to the trip.
         """
-        serializer.save(user=self.request.user)
+        print("perform_create called with data:", serializer.validated_data)
+        try:
+            if self.request and hasattr(self.request, 'user') and self.request.user.is_authenticated:
+                serializer.save(user=self.request.user)
+            else:
+                # Save without a user for public access
+                serializer.save()
+            print("Trip saved successfully")
+        except Exception as e:
+            print("Error in perform_create:", str(e))
+            import traceback
+            traceback.print_exc()
+            raise
 
     @action(detail=True, methods=["post"], url_path="plan")
     def plan_route(self, request, pk=None):

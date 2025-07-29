@@ -30,15 +30,6 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if user is authenticated
-    if (!isAuthenticated()) {
-      // Store form data in session storage to repopulate after login
-      sessionStorage.setItem('tripFormData', JSON.stringify(formData));
-      // Redirect to login with a return URL
-      navigate('/login?returnTo=/');
-      return;
-    }
-
     setIsLoading(true);
     try {
       // Map formData to backend snake_case keys

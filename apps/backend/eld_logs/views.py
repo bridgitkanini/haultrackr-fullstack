@@ -12,16 +12,15 @@ from route_planner.models import Trip
 
 class LogSheetViewSet(viewsets.ModelViewSet):
     serializer_class = LogSheetSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = LogSheet.objects.all()  # Add this line
+    permission_classes = []  # Remove authentication requirement
+    queryset = LogSheet.objects.all()
     
     def get_queryset(self):
         """
-        This view should return a list of all the log sheets
-        for trips belonging to the currently authenticated user.
+        Return all log sheets. In a production environment, you might want to add
+        additional filtering or security measures here.
         """
-        user = self.request.user
-        return LogSheet.objects.filter(trip__user=user)
+        return LogSheet.objects.all()
     
     @action(detail=False, methods=['post'])
     def generate_logs(self, request):

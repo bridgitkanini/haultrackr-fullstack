@@ -25,8 +25,7 @@ class RestStopSerializer(serializers.ModelSerializer):
 class TripSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trip
-        fields = '__all__'
-        read_only_fields = ('user',)
+        exclude = ('user',)  # Exclude user field from serialization
 
 class TripPlanSerializer(serializers.Serializer):
     """
