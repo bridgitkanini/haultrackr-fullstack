@@ -7,6 +7,7 @@
 **HaulTrackr** is a full-stack application designed to help truck drivers plan optimal routes and manage Electronic Logging Device (ELD) logs, ensuring compliance with Hours of Service (HOS) regulations. The system integrates a React frontend for user interaction and a Django backend for route planning, log generation, and compliance logic.
 
 Deployed Frontend: https://haultrackr.onrender.com 
+
 Deployed Backend: https://haultrackr-fullstack.onrender.com/api
 
 ## Project Structure
