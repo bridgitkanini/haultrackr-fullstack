@@ -16,14 +16,17 @@ Deployed Backend: https://haultrackr-fullstack.onrender.com/api
 haultrackr-fullstack/
 ├── apps/
 │   ├── backend/             # Django backend application
-│   │   ├── api/             # API endpoints and views
-│   │   ├── core/            # Core application logic
-│   │   └── manage.py        # Django management script
+│   │   ├── eld_logs/        # ELD logs management
+│   │   ├── route_planner/   # Route planning and optimization
+│   │   ├── users/           # User authentication and management
+│   │   └── haultrackrbackend/  # Main Django project configuration
 │   │
 │   ├── frontend/            # React frontend application
-│   │   ├── src/             # Source code
+│   │   ├── src/
 │   │   │   ├── components/  # Reusable UI components
 │   │   │   ├── pages/       # Page components
+│   │   │   ├── lib/         # Utility functions and libraries
+│   │   │   ├── types/       # TypeScript type definitions
 │   │   │   └── App.tsx      # Main application component
 │   │   └── ...
 │   │
@@ -48,36 +51,51 @@ haultrackr-fullstack/
 - **Rest & Fuel Stop Optimization:** Plans required rest and fuel stops along the route.
 - **Authentication:** Secure user registration and login with JWT-based authentication.
 - **Interactive UI:** Modern React frontend with map visualization, trip forms, and log sheet display.
+- **User Authentication:** Secure user registration and login system
 
 ### System Architecture
 
-- **Frontend:** React (with Vite, Tailwind CSS, and Leaflet for maps)
-- **Backend:** Django & Django REST Framework, SQLite (default), OpenRouteService API, JWT authentication
-- **API Docs:** Swagger and ReDoc available at `/swagger/` and `/redoc/` on the backend server
+- **Frontend:**
+  - React with TypeScript
+  - Vite for build tooling
+  - React Router for navigation
+
+- **Backend:**
+  - Django REST Framework
+  - SQLite database (default)
+  - JWT authentication
+  - Modular architecture with separate apps for different features
+
+- **API Docs:** 
+  - Swagger and ReDoc available at `/swagger/` and `/redoc/` on the backend server
 
 ---
 
 ## Setup
 
-### Backend
+### Prerequisites
+
+- Node.js (v14 or later)
+- Python (3.8 or later)
+- pnpm (package manager)
+
+### Backend Setup
 
 1. **Clone the repository:**
-
    ```bash
    git clone https://github.com/bridgitkanini/haultrackr-fullstack.git
+   cd haultrackr-fullstack
+   ```
+
+2. **Set up Python virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+   ```
+
+3. **Install Python dependencies:**
+   ```bash
    cd apps/backend
-   ```
-
-2. **Create and activate a virtual environment:**
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies:**
-
-   ```bash
    pip install -r requirements.txt
    ```
 
@@ -94,64 +112,63 @@ haultrackr-fullstack/
    python manage.py migrate
    ```
 
-6. **Run the development server:**
-
+6. **Start the development server:**
    ```bash
    python manage.py runserver
    ```
+   The API will be available at [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
 
 7. **Access the API and documentation:**
    - API root: [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
    - Swagger: [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/)
    - ReDoc: [http://127.0.0.1:8000/redoc/](http://127.0.0.1:8000/redoc/)
 
-### Frontend
+### Frontend Setup
 
-1. **Install dependencies:**
-
+1. **Install dependencies using pnpm:**
    ```bash
-   npm install 
+   pnpm install
    ```
 
-2. **Run the development server:**
+2. **Start the development server:**
    ```bash
-   npx nx serve frontend
+   pnpm start
    ```
    The frontend will be available at [http://localhost:4200](http://localhost:4200).
 
 ---
 
-## API Endpoints
-
-All endpoints are available under the `/api/` prefix on the backend server.
+## API Documentation
 
 ### Authentication
 
-- `POST /users/register/` — Register a new user
-- `POST /token/` — Obtain JWT access and refresh tokens
-- `POST /token/refresh/` — Refresh an access token
+- `POST /api/auth/register/` — Register a new user
+- `POST /api/auth/login/` — User login
+- `POST /api/auth/refresh/` — Refresh authentication token
 
-### Trip Planning
+### Trips
 
-- `GET /trips/` — List all trips for the authenticated user
-- `POST /trips/` — Create a new trip
-- `GET /trips/{id}/` — Retrieve details for a specific trip
-- `POST /trips/{id}/plan/` — Generate a full route plan for a trip
+- `GET /api/trips/` — List all trips for the authenticated user
+- `POST /api/trips/` — Create a new trip
+- `GET /api/trips/{id}/` — Get trip details
+- `PUT /api/trips/{id}/` — Update a trip
+- `DELETE /api/trips/{id}/` — Delete a trip
 
-### Log Management
+### ELD Logs
 
-- `GET /logs/` — List all log sheets for the authenticated user's trips
-- `GET /logs/{id}/` — Get a specific log sheet
-- `POST /logs/generate_logs/` — Generate log sheets for a given trip
-- `GET /logs/{id}/grid/` — Get a visual grid image for a specific log sheet
+- `GET /api/eld-logs/` — List all ELD logs
+- `POST /api/eld-logs/` — Create a new ELD log entry
+- `GET /api/eld-logs/{id}/` — Get log details
+- `GET /api/eld-logs/trip/{trip_id}/` — Get logs for a specific trip
 
-### Duty Status Management
+### Users
 
-- `GET /duty-status/` — List all duty status changes for the authenticated user
-- `POST /duty-status/` — Create a new duty status change
-- `GET /duty-status/{id}/` — Get a specific duty status change
+- `GET /api/users/me/` — Get current user profile
+- `PUT /api/users/me/` — Update user profile
 
-> For full API details, data models, and advanced configuration, see [`apps/backend/README.md`](apps/backend/README.md).
+For detailed API documentation, run the development server and visit:
+- API root: [http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)
+- Admin interface: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) (requires superuser)
 
 ---
 
