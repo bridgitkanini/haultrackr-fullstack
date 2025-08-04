@@ -6,7 +6,9 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["vite/client", "vitest"],
+
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -14,11 +16,7 @@
       "@pages/*": ["src/pages/*"],
       "@lib/*": ["src/lib/*"],
       "@types/*": ["src/types/*"]
-    },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
-    ]
+    }
   },
   "include": [
     "src/**/*.ts",
@@ -26,13 +24,5 @@
     "src/**/*.js",
     "src/**/*.jsx"
   ],
-  "exclude": ["node_modules"],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+  "exclude": ["node_modules"]
 }
